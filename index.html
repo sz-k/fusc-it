@@ -2,12 +2,13 @@
   table { border-spacing: 0; border-collapse: collapse; }
   td { vertical-align: top; padding: 0; }
   tbody { text-align: center; }
-  textarea { border: 1px inset silver; }
-  canvas { border: 1px inset salmon; }
+  textarea { border: 1px inset silver; margin: 0 0 5px; }
+  #canvasWrapper { border: 1px inset silver; width: 128px; height: 128px; overflow: hidden; padding: 10px; margin: 0 5px 5px; }
+  canvas { width: 100%; height: 100%; }
 </style></head><body>
 
 <div id="content">
-  <p>Convert text into image.</p>
+  <p>Store text in image.</p>
   <table>
     <thead>
       <tr>
@@ -19,41 +20,31 @@
     <tbody>
       <tr>
         <td>
-          <label><input type="checkbox" id="isMarkdown"> is markdown?</label>
+          <textarea id="inputText" rows="20" cols="40">The quick brown fox jumps over the lazy dog.</textarea>
           <br>
-          <textarea id="inputText" rows="20" cols="40">
-# Lorem ipsum dolor sit amet
-
-consectetur adipiscing elit. Maecenas non metus non velit ultricies accumsan. Etiam gravida dignissim magna, sit amet iaculis ante condimentum eu. Curabitur et elit non lectus mattis euismod sit amet et nisi. Nam ut dui id felis interdum aliquam. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut pretium ligula urna, vitae ullamcorper neque congue ac. Curabitur eget tellus dui. Morbi vitae erat justo. Praesent nec nibh in velit tempor vulputate. Suspendisse odio metus, sollicitudin et hendrerit eget, tempor a eros. Vestibulum dapibus, est nec varius rhoncus, nisl sapien faucibus massa, vel convallis mauris erat et nulla. Curabitur eleifend ipsum nisl, id malesuada nunc egestas in. Maecenas quis est odio. Donec ante magna, rhoncus eu dui quis, facilisis sagittis sem. Duis auctor, lacus vitae molestie porttitor, turpis quam porttitor tortor, ac feugiat nulla massa ut arcu.
-Duis eget lacinia neque. Etiam malesuada sit amet odio imperdiet blandit. Cras placerat bibendum ante, eu fermentum sem mattis eu. Proin id nulla ac erat hendrerit rutrum quis sit amet tortor. Donec ut odio facilisis, consequat ipsum vitae, mattis lorem. Donec faucibus volutpat felis id commodo. Mauris in pulvinar turpis. Aliquam varius arcu iaculis, blandit lorem ut, pellentesque nunc. Maecenas tempor nec dui eget facilisis. Ut vel feugiat ipsum, sed lobortis tellus. In facilisis rutrum interdum. Aenean et ipsum sit amet arcu vestibulum cursus. Nulla feugiat sodales lorem a tempus. Nullam vel elit vitae risus faucibus posuere. Proin vehicula pulvinar dui.
-Etiam sit amet sodales velit. Interdum et malesuada fames ac ante ipsum primis in faucibus. Phasellus tincidunt purus vel tortor congue, ut interdum lectus commodo. Cras tincidunt accumsan augue, vel vestibulum massa consectetur nec. Etiam malesuada pulvinar nunc vel auctor. Vestibulum a ligula magna. Quisque vitae dui felis. Cras rhoncus convallis neque, mattis feugiat ipsum porttitor non. Nullam finibus pulvinar condimentum.
-Aliquam in ex urna. Etiam maximus, turpis vitae rutrum iaculis, risus risus dignissim lorem, sit amet ullamcorper massa sem eu elit. Nam finibus laoreet odio, id imperdiet tortor accumsan eu. Vivamus nec lacus sit amet velit faucibus suscipit ac vel nulla. Vestibulum a tincidunt neque, quis euismod augue. Sed auctor nibh in venenatis accumsan. Integer at convallis tortor. Integer est sapien, volutpat quis purus a, tristique porttitor quam. Fusce eget nunc mi. Aenean ac nulla vitae quam mattis sollicitudin vitae sed ligula. Vestibulum aliquam quis est at eleifend.
-In blandit purus a enim pulvinar vulputate. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Maecenas varius semper ante, quis tristique elit rhoncus in. Nulla dictum, augue vitae porttitor mattis, nisi lectus tempus nulla, non consequat libero nisi quis sem. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Praesent ac orci faucibus, pellentesque nisi vel, interdum enim. Curabitur euismod sem sit amet urna blandit volutpat. Fusce quam nibh, auctor ut sem quis, molestie molestie felis.
-          </textarea>
-          <br>
-          <button id="submit">✨</button>
+          <button id="submit">⚙</button>
         </td>
         <td>
-          <br>
           <div id="canvasWrapper"></div>
           <button id="download">💾</button>
         </td>
         <td>
-          <br>
           <textarea id="restoredText" rows="20" cols="40"></textarea>
+          <br>
+          <button id="restore">✨</button>
         </td>
       </tr>
     </tbody>
   </table>
 </div>
 
-<script src="vendor/showdown.min.js"></script>
 <script src="vendor/reimg.min.js"></script>
-<script src="common.js"></script>
+<script src="src/common.js"></script>
+<script src="src/img2txt.js"></script>
 <script>(() => {
   eval(szk.extract())
-  const sdConverter = new showdown.Converter()
 
+  // download image button click
   $('download').addEventListener('click', () => {
     const can = $('canvas')
     if (can) {
@@ -61,33 +52,35 @@ In blandit purus a enim pulvinar vulputate. Orci varius natoque penatibus et mag
     }
   })
 
+  // restore from canvas button click
+  $('restore').addEventListener('click', () => {
+    const sourceEl = $('inputText')
+    const restoreEl = $('restoredText')
+    // `imageToTxt('canvas', true)` for immediate eval
+    imageToTxt('canvas', s => {
+      restoreEl.value = s
+      if (restoreEl.value !== sourceEl.value) {
+        console.error('Whoops :(') // very test
+      }
+    })
+  })
+
+  // convert button clicked
   $('submit').addEventListener('click', () => {
-    let inputText = $('inputText').value.trim()
-    if ($('isMarkdown').checked) {
-      inputText = sdConverter.makeHtml(inputText)
-    }
-
-    // get rgb stream and calculate canvas width and height
+    $('restoredText').value = ''
+    let inputText = $('inputText').value
     const pixels = strToRgbStream(inputText)
-    let sqrSize = Math.ceil(Math.sqrt(pixels.length))
-
-    // create canvas context
-    const canvasEl = document.createElement('canvas')
-    Object.assign(canvasEl, { width: sqrSize, height: sqrSize, id: 'canvas'})
-    const ctx = canvasEl.getContext('2d')
-    $('canvasWrapper').innerHTML = ''
-    $('canvasWrapper').appendChild(canvasEl)
+    const sqrSize = Math.ceil(Math.sqrt(pixels.length))
+    const ctx = addCanvas('canvasWrapper', sqrSize).getContext('2d')
 
     // customized putPixel
-    const pp = (x, y, rgb) => {
-      putPixel(ctx, x, y, rgb[0] || 0, rgb[1] || 0, rgb[2] || 0, 0)
-    }
+    const pp = (x, y, rgb) => putPixel(ctx, x, y, rgb[0] || 0, rgb[1] || 0, rgb[2] || 0, 1)
 
     // fill the image
     let row = 0
     let col = 0
     for (let i = 0; i < sqrSize * sqrSize; i++) {
-      if (col > sqrSize) {
+      if (col > sqrSize - 1) {
         col = 0
         row++
       }
@@ -96,5 +89,7 @@ In blandit purus a enim pulvinar vulputate. Orci varius natoque penatibus et mag
     }
   })
 
+  // demo
   $('submit').click()
+  $('restore').click()
 })()</script>

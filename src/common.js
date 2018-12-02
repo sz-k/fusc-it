@@ -1,20 +1,31 @@
 window.szk = (() => {
   const ret = {}
 
-  ret.$ = id => document.getElementById(id)
+  const $ = ret.$ = id => document.getElementById(id)
 
   ret.$$ = selector => Array.from(document.getElementsByClassName(selector))
 
-  const rand = ret.rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min
-
   ret.putPixel = (ctx, x, y, r = 0, g = 0, b = 0, a = 1) => {
-    ctx.fillStyle = `rgba(${r},${g},${b},${a})`
-    ctx.fillRect(x,y,1,1)
+    ctx.fillStyle = `rgb(${r},${g},${b})`
+    ctx.fillRect(x, y, 1, 1)
   }
 
-  // on six bytes
-  longToByteArray = function(long) {
-    var byteArray = [0, 0, 0, 0, 0, 0]
+  // create a canvas and append it to an element
+  ret.addCanvas = (targetId, size) => {
+    const canvasEl = document.createElement('canvas')
+    Object.assign(canvasEl, {
+      width: size,
+      height: size,
+      id: 'canvas'
+    })
+    $(targetId).innerHTML = ''
+    $(targetId).appendChild(canvasEl)
+    return canvasEl
+  }
+
+  // store integer on six bytes
+  const longToByteArray = (long) => {
+    const byteArray = [0, 0, 0, 0, 0, 0]
     for (let i = 0; i < byteArray.length; i ++ ) {
       const byte = long & 0xff
       byteArray[i] = byte
@@ -26,15 +37,15 @@ window.szk = (() => {
   // byte stream structure:
   // [0, values], so
   // Ű => 0, 197, 176
-  // a => 0, 97
+  // a => 1, 97
   const strToByteStream = ret.strToByteStream = (s) => {
     let ret = []
     for (let i = 0; i < s.length; i++) {
-      const x = encodeURI(s.substr(i, 1))
+      const x = encodeURIComponent(s.charAt(i))
       if (x.includes('%')) {
-        ret = ret.concat(...x.split('%').reduce((acc, num) => acc.concat(parseInt(num, 16) || 0), [])) // 0 + A,B,C
+        ret.push.apply(ret, x.split('%').reduce((acc, num) => acc.concat(parseInt(num, 16) || 0), [])) // 0 + A,B,C
       } else {
-        ret = ret.concat([ 0, s.charCodeAt(i) ])
+        ret.push.apply(ret, [ 1, s.charCodeAt(i) ])
       }
     }
     return ret
@@ -46,7 +57,7 @@ window.szk = (() => {
   ret.strToRgbStream = (s) => {
     let bytes = strToByteStream(s)
     const size = longToByteArray(bytes.length)
-    const ret = [ size.slice(0, 3), size.slice(3, 6) ]
+    const ret = [ size.slice(0, 3), size.slice(3, 6) ] // six bytes for the total size
     let i
     for (i = 0; i < bytes.length; i += 3) {
       ret.push([bytes[i] || 0, bytes[i + 1] || 0, bytes[i + 2] || 0])
