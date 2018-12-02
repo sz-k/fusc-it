@@ -1,8 +1,9 @@
 # fusc-it
 
-obfuscators
+obfuscators for fun
+
+[sz-k.github.io/fusc-it](https://sz-k.github.io/fusc-it/)
 
 ## vendor libs
 
-1. [showdown](https://github.com/showdownjs/showdown)
-2. [reimg](https://github.com/gillyb/reimg)
+- [reimg](https://github.com/gillyb/reimg) (MIT)
