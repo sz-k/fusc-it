@@ -55,7 +55,7 @@
   $('restore').addEventListener('click', () => {
     const sourceEl = $('inputText')
     const restoreEl = $('restoredText')
-    // `imageToTxt('canvas', true)` for immediate eval
+    // use `imageToTxt('canvas', true)` for immediate eval
     imageToTxt('canvas', s => {
       restoreEl.value = s
       if (restoreEl.value !== sourceEl.value) {
@@ -67,25 +67,8 @@
   // convert button clicked
   $('submit').addEventListener('click', () => {
     $('restoredText').value = ''
-    let inputText = $('inputText').value
-    const pixels = strToRgbStream(inputText)
-    const sqrSize = Math.ceil(Math.sqrt(pixels.length))
-    const ctx = addCanvas('canvasWrapper', sqrSize).getContext('2d')
-
-    // customized putPixel
-    const pp = (x, y, rgb) => putPixel(ctx, x, y, rgb[0] || 0, rgb[1] || 0, rgb[2] || 0, 1)
-
-    // fill the image
-    let row = 0
-    let col = 0
-    for (let i = 0; i < sqrSize * sqrSize; i++) {
-      if (col > sqrSize - 1) {
-        col = 0
-        row++
-      }
-      pp(col, row, pixels[i] || [])
-      col++
-    }
+    createEncodedCanvas($('inputText').value, 'canvasWrapper')
+    $('restore').click()
   })
 
   // demo
