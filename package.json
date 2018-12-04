@@ -1,0 +1,20 @@
+{
+  "name": "fusc-it",
+  "version": "1.0.0",
+  "description": "obfuscators for fun",
+  "main": "index.js",
+  "scripts": {
+    "start": "serve ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sz-k/fusc-it.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sz-k/fusc-it/issues"
+  },
+  "homepage": "https://github.com/sz-k/fusc-it#readme"
+}

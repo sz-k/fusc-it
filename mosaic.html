@@ -1,0 +1,64 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><title>mosaic</title><style>
+  table { border-spacing: 0; border-collapse: collapse; }
+  td { vertical-align: top; padding: 0 5px; }
+  textarea { width: 240px; height: 320px; padding: 0; }
+  #render { border: 1px solid maroon; }
+  #render div { transition: all 2s ease-out; top: 0; left: 0; box-shadow: 0 0 5px rgba(0,0,0,.3); }
+  #render div:hover { transition: all .2s ease; filter: brightness(1.8); transform: scale(0.5, 0.5); opacity: .7; z-index: 1; }
+</style></head><body>
+
+<div id="content">
+  <label>width <input type="number" value="80" id="width"></label>
+  <label>height <input type="number" value="80" id="height"></label>
+  <button id="run">✨</button>
+  <table>
+    <tr>
+      <th>input</th>
+      <th>render</th>
+      <th>raw source</th>
+    </tr>
+    <tr>
+      <td><img id="input" src="sample.png"></td>
+      <td><div id="render"></div></td>
+      <td>
+        <textarea id="out"></textarea><br>
+        <small>size: <span id="sizeStat">0</span></small>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<script src="src/common.js"></script>
+<script>(() => {
+  eval(szk.extract())
+
+  $('run').addEventListener('click', () => {
+    const renderBox = $('render')
+
+    loadImageToCanvas('input').then((canvas, ctx) => {
+      const width = $('width').value
+      const height = $('height').value
+      const mosaics = getMosaics(canvas, width, height)
+
+      renderBox.innerHTML = ''
+      mosaics.forEach((row, x) => {
+        row.forEach((cell, y) => {
+          renderBox.appendChild(createMosaicEl(x, y, width, height, cell))
+        })
+      })
+
+      Object.assign(renderBox.style, {
+        width: `${canvas.width}px`,
+        height: `${canvas.height}px`,
+        display: 'flex',
+        flexWrap: 'wrap'
+      })
+      text = renderBox.outerHTML
+      $('out').value = text
+      $('sizeStat').innerHTML = text.length
+    })
+  })
+
+  // demo
+  $('run').click()
+})()</script>
