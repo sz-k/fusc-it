@@ -2,7 +2,7 @@
 
 obfuscators for fun
 
-[sz-k.github.io/fusc-it](https://sz-k.github.io/fusc-it/)
+[szkrd.github.io/fusc-it](https://szkrd.github.io/fusc-it/)
 
 ## dummy server
 
